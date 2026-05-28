@@ -1,43 +1,53 @@
-# import mysql.connector
+import sqlite3
 
-# config = {
-#     'user': 'root',
-#     'password': '',
-#     'host': '127.0.0.1',
-#     'database': 'project',
-#     'raise_on_warnings': True,
-#     'port': '3305'
-# }
+DB_NAME = "app.db"
 
 
-
-# def create_user(email):
-#     pass
-
-# from datetime import datetime
-# print(datetime.now().strftime("%H:%M:%S"))
+def get_connection():
+    return sqlite3.connect(DB_NAME)
 
 
-# # cnx = mysql.connector.connect(**config)
+def init_db():
+    conn = get_connection()
+    cur = conn.cursor()
 
-# # cursor = cnx.cursor()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS clothing_sets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        folder_path TEXT
+    )
+    """)
 
-# # cursor.execute("""
-# # CREATE TABLE IF NOT EXISTS test (
-# #     id INT AUTO_INCREMENT PRIMARY KEY,
-# #     name VARCHAR(100)
-# # )               
-# # """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        clothing_set_id INTEGER,
+        image_path TEXT,
+        image_type TEXT,
+        FOREIGN KEY (clothing_set_id) REFERENCES clothing_sets(id)
+    )
+    """)
 
-# # cursor.execute("INSERT INTO test (name) VALUES (%s)", ("Arthur",))
-# # cursor.execute("DELETE FROM test WHERE name = 'Arthur'")
-# # cursor.execute("SELECT * FROM test")
-# # rows = cursor.fetchall()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS masks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        clothing_set_id INTEGER,
+        mask_path TEXT,
+        mask_type TEXT,
+        FOREIGN KEY (clothing_set_id) REFERENCES clothing_sets(id)
+    )
+    """)
 
-# # for row in rows:
-# #     print(row)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS measurements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        clothing_set_id INTEGER,
+        shoulder_width REAL,
+        clothing_width REAL,
+        clothing_height REAL,
+        FOREIGN KEY (clothing_set_id) REFERENCES clothing_sets(id)
+    )
+    """)
 
-# # cnx.commit()
-
-# # cursor.close()
-# # cnx.close()
+    conn.commit()
+    conn.close()
